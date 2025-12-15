@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,42 +8,29 @@
   body {
     margin: 0;
     padding: 0;
-    background: url('background.jpg') no-repeat center center fixed;
-    background-size: cover;
-    overflow: hidden;
+    background: #f0e6d2; /* parchment-like background for the page */
     font-family: 'Georgia', serif;
+    overflow: hidden;
   }
 
-  /* Leaves on edges */
-  .leaves-left, .leaves-right {
-    position: fixed;
-    top: 0;
-    height: 100%;
-    width: 100px;
-    pointer-events: none;
-    z-index: 2;
-  }
-  .leaves-left { left: 0; background: url('leaves-left.png') repeat-y; }
-  .leaves-right { right: 0; background: url('leaves-right.png') repeat-y; }
-
-  /* Parchment letter */
+  /* Parchment-style letter container */
   .letter-container {
     position: relative;
     width: 70%;
     max-width: 800px;
     margin: auto;
     top: 10%;
-    background: url('parchment.png') no-repeat center center;
-    background-size: cover;
-    color: #4B3621; /* readable on parchment */
+    background: #fdf1d6;
     padding: 40px;
     font-size: 1.2em;
     line-height: 1.6em;
-    overflow: hidden;
     height: 80%;
-    z-index: 1;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
     border-radius: 20px;
+    border: 2px solid #d2b48c;
+    background-image: radial-gradient(rgba(0,0,0,0.01) 1px, transparent 1px);
+    background-size: 20px 20px; /* subtle texture */
   }
 
   .letter-content {
@@ -54,38 +40,25 @@
   }
 
   audio {
-    display: none;
+    display: none; /* hide audio completely */
   }
 </style>
 </head>
 <body>
 
-<div class="leaves-left"></div>
-<div class="leaves-right"></div>
-
 <div class="letter-container" id="letterContainer">
   <div class="letter-content" id="letterContent">
-    Dear Friend,
-
-    I hope this letter finds you well.
-
-    It has been a long time since we last spoke, and I wanted to share my thoughts with you. I hope someday we can meet again and reminisce about old times.
-
-    Yours sincerely,
-    Me
+    Loading letter...
   </div>
 </div>
 
 <audio id="bgMusic" loop>
-  <source src="music.mp3" type="audio/mpeg">
-  Your browser does not support the audio element.
+  <source src="song.mp3" type="audio/mpeg">
 </audio>
 
 <script>
   const music = document.getElementById('bgMusic');
   const content = document.getElementById('letterContent');
-  const container = document.getElementById('letterContainer');
-
   let scrollPos = 0;
   let scrolling = false;
 
@@ -100,7 +73,7 @@
     if(scrolling){
       scrollPos -= 0.1; // very slow
       content.style.top = scrollPos + 'px';
-      if(Math.abs(scrollPos) < content.scrollHeight){
+      if(Math.abs(scrollPos) < content.scrollHeight + 50){
         requestAnimationFrame(scrollLetter);
       }
     }
@@ -113,25 +86,26 @@
     }
   }
 
-  // Start music on first touch
-  document.body.addEventListener('touchstart', function(){
+  function startExperience() {
     if(music.paused){
       music.play();
       startScroll();
     } else {
       toggleScroll();
     }
-  });
+  }
 
-  // Also allow click for desktop
-  document.body.addEventListener('click', function(){
-    if(music.paused){
-      music.play();
-      startScroll();
-    } else {
-      toggleScroll();
-    }
-  });
+  // Start music and scroll on first touch or click
+  document.body.addEventListener('touchstart', startExperience, {once:true});
+  document.body.addEventListener('click', startExperience, {once:true});
+
+  // Load letter from file
+  fetch('letter.txt')
+    .then(response => response.text())
+    .then(text => {
+      content.textContent = text;
+    })
+    .catch(err => console.error('Error loading letter:', err));
 </script>
 
 </body>
