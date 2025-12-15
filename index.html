@@ -4,9 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Merry Christmas</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
-
 <style>
 body {
   margin: 0;
@@ -25,7 +23,6 @@ body {
   animation: fall linear infinite;
   opacity: 0.7;
 }
-
 @keyframes fall {
   0% { transform: translateY(0) rotate(0); }
   100% { transform: translateY(110vh) rotate(360deg); }
@@ -36,20 +33,16 @@ body {
   max-width: 90%;
   margin: 80px auto;
   padding: 40px 30px;
-  background: #f5e7c6;
+  background: url('https://i.ibb.co/3skqBrv/parchment-bg.png') center/cover no-repeat;
   border-radius: 18px;
   box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-
-  max-height: 75vh;              /* allows scrolling */
+  max-height: 75vh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-}
-
-/* Preserve paragraphs */
-pre {
-  white-space: pre-wrap;
-  font-size: 1.05rem;
+  user-select: none;
   line-height: 1.8;
+  font-size: 1.05rem;
+  color: #2b1d0f;
 }
 
 /* Music */
@@ -61,7 +54,6 @@ pre {
 }
 </style>
 </head>
-
 <body>
 
 <!-- Leaves -->
@@ -72,76 +64,53 @@ pre {
 
 <!-- Music -->
 <div class="audio">
-  <audio controls loop>
+  <audio id="music" controls>
     <source src="song.mp3" type="audio/mpeg">
+    Your browser does not support audio.
   </audio>
 </div>
 
 <!-- Letter -->
-<div class="scroll">
-  <pre id="letter">Loading letter…</pre>
+<div class="scroll" id="scrollBox">
+  <div id="letter">Loading letter…</div>
 </div>
 
 <script>
+// Load letter
 fetch("letter.txt")
   .then(res => res.text())
   .then(text => {
-    const letter = document.getElementById("letter");
-    const scrollBox = document.querySelector(".scroll");
-    const audio = document.querySelector("audio");
-
-    letter.textContent = text;
-
-    let scrollSpeed = 0.3; // very slow
-    let scrolling = false;
-    let userTouching = false;
-
-    function autoScroll() {
-      if (!scrolling || userTouching) return;
-
-      scrollBox.scrollTop += scrollSpeed;
-
-      if (
-        scrollBox.scrollTop + scrollBox.clientHeight <
-        scrollBox.scrollHeight
-      ) {
-        requestAnimationFrame(autoScroll);
-      }
-    }
-
-    // Start scrolling ONLY when music plays
-    audio.addEventListener("play", () => {
-      if (!scrolling) {
-        scrolling = true;
-        requestAnimationFrame(autoScroll);
-      }
-    });
-
-    // Pause when user touches
-    scrollBox.addEventListener("touchstart", () => {
-      userTouching = true;
-    });
-
-    scrollBox.addEventListener("touchend", () => {
-      userTouching = false;
-      if (scrolling) requestAnimationFrame(autoScroll);
-    });
-
-    // Also pause for mouse (desktop)
-    scrollBox.addEventListener("mouseenter", () => {
-      userTouching = true;
-    });
-
-    scrollBox.addEventListener("mouseleave", () => {
-      userTouching = false;
-      if (scrolling) requestAnimationFrame(autoScroll);
-    });
-  })
-  .catch(() => {
-    document.getElementById("letter").textContent =
-      "Could not load letter.txt. Make sure it is uploaded correctly.";
+    document.getElementById("letter").textContent = text;
   });
-</script>
 
+// Auto scroll setup
+const scrollBox = document.getElementById("scrollBox");
+const audio = document.getElementById("music");
+let scrollSpeed = 0.2; // very slow
+let scrolling = false;
+let userTouching = false;
+
+function autoScroll() {
+  if (!scrolling || userTouching) return;
+  scrollBox.scrollTop += scrollSpeed;
+  if (scrollBox.scrollTop + scrollBox.clientHeight < scrollBox.scrollHeight) {
+    requestAnimationFrame(autoScroll);
+  }
+}
+
+// Start scrolling only after user presses Play
+audio.addEventListener("play", () => {
+  if (!scrolling) {
+    scrolling = true;
+    requestAnimationFrame(autoScroll);
+  }
+});
+
+// Pause scrolling on touch
+scrollBox.addEventListener("touchstart", () => userTouching = true);
+scrollBox.addEventListener("touchend", () => { userTouching = false; requestAnimationFrame(autoScroll); });
+scrollBox.addEventListener("mouseenter", () => userTouching = true);
+scrollBox.addEventListener("mouseleave", () => { userTouching = false; requestAnimationFrame(autoScroll); });
+</script>
 </body>
 </html>
