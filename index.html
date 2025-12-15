@@ -1,116 +1,138 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Merry Christmas</title>
-<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<title>Letter</title>
 <style>
-body {
-  margin: 0;
-  min-height: 100vh;
-  background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364);
-  font-family: 'Patrick Hand', cursive;
-  color: #2b1d0f;
-  overflow-x: hidden;
-}
+  body {
+    margin: 0;
+    padding: 0;
+    background: url('background.jpg') no-repeat center center fixed;
+    background-size: cover;
+    overflow: hidden;
+    font-family: 'Georgia', serif;
+  }
 
-/* Leaves */
-.leaf {
-  position: fixed;
-  top: -10%;
-  font-size: 24px;
-  animation: fall linear infinite;
-  opacity: 0.7;
-}
-@keyframes fall {
-  0% { transform: translateY(0) rotate(0); }
-  100% { transform: translateY(110vh) rotate(360deg); }
-}
+  /* Leaves on edges */
+  .leaves-left, .leaves-right {
+    position: fixed;
+    top: 0;
+    height: 100%;
+    width: 100px;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .leaves-left { left: 0; background: url('leaves-left.png') repeat-y; }
+  .leaves-right { right: 0; background: url('leaves-right.png') repeat-y; }
 
-/* Scroll parchment */
-.scroll {
-  max-width: 90%;
-  margin: 80px auto;
-  padding: 40px 30px;
-  background: url('https://i.ibb.co/3skqBrv/parchment-bg.png') center/cover no-repeat;
-  border-radius: 18px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-  max-height: 75vh;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  user-select: none;
-  line-height: 1.8;
-  font-size: 1.05rem;
-  color: #2b1d0f;
-}
+  /* Parchment letter */
+  .letter-container {
+    position: relative;
+    width: 70%;
+    max-width: 800px;
+    margin: auto;
+    top: 10%;
+    background: url('parchment.png') no-repeat center center;
+    background-size: cover;
+    color: #4B3621; /* readable on parchment */
+    padding: 40px;
+    font-size: 1.2em;
+    line-height: 1.6em;
+    overflow: hidden;
+    height: 80%;
+    z-index: 1;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    border-radius: 20px;
+  }
 
-/* Music */
-.audio {
-  position: fixed;
-  bottom: 15px;
-  left: 50%;
-  transform: translateX(-50%);
-}
+  .letter-content {
+    position: relative;
+    top: 100%;
+    white-space: pre-wrap; /* preserves paragraphs and spaces */
+  }
+
+  audio {
+    display: none;
+  }
 </style>
 </head>
 <body>
 
-<!-- Leaves -->
-<div class="leaf" style="left:15%; animation-duration:14s;">🍂</div>
-<div class="leaf" style="left:35%; animation-duration:18s;">🍁</div>
-<div class="leaf" style="left:55%; animation-duration:16s;">🍂</div>
-<div class="leaf" style="left:75%; animation-duration:20s;">🍁</div>
+<div class="leaves-left"></div>
+<div class="leaves-right"></div>
 
-<!-- Music -->
-<div class="audio">
-  <audio id="music" controls>
-    <source src="song.mp3" type="audio/mpeg">
-    Your browser does not support audio.
-  </audio>
+<div class="letter-container" id="letterContainer">
+  <div class="letter-content" id="letterContent">
+    Dear Friend,
+
+    I hope this letter finds you well.
+
+    It has been a long time since we last spoke, and I wanted to share my thoughts with you. I hope someday we can meet again and reminisce about old times.
+
+    Yours sincerely,
+    Me
+  </div>
 </div>
 
-<!-- Letter -->
-<div class="scroll" id="scrollBox">
-  <div id="letter">Loading letter…</div>
-</div>
+<audio id="bgMusic" loop>
+  <source src="music.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
 
 <script>
-// Load letter
-fetch("letter.txt")
-  .then(res => res.text())
-  .then(text => {
-    document.getElementById("letter").textContent = text;
+  const music = document.getElementById('bgMusic');
+  const content = document.getElementById('letterContent');
+  const container = document.getElementById('letterContainer');
+
+  let scrollPos = 0;
+  let scrolling = false;
+
+  function startScroll() {
+    if(!scrolling){
+      scrolling = true;
+      scrollLetter();
+    }
+  }
+
+  function scrollLetter(){
+    if(scrolling){
+      scrollPos -= 0.1; // very slow
+      content.style.top = scrollPos + 'px';
+      if(Math.abs(scrollPos) < content.scrollHeight){
+        requestAnimationFrame(scrollLetter);
+      }
+    }
+  }
+
+  function toggleScroll(){
+    scrolling = !scrolling;
+    if(scrolling){
+      scrollLetter();
+    }
+  }
+
+  // Start music on first touch
+  document.body.addEventListener('touchstart', function(){
+    if(music.paused){
+      music.play();
+      startScroll();
+    } else {
+      toggleScroll();
+    }
   });
 
-// Auto scroll setup
-const scrollBox = document.getElementById("scrollBox");
-const audio = document.getElementById("music");
-let scrollSpeed = 0.2; // very slow
-let scrolling = false;
-let userTouching = false;
-
-function autoScroll() {
-  if (!scrolling || userTouching) return;
-  scrollBox.scrollTop += scrollSpeed;
-  if (scrollBox.scrollTop + scrollBox.clientHeight < scrollBox.scrollHeight) {
-    requestAnimationFrame(autoScroll);
-  }
-}
-
-// Start scrolling only after user presses Play
-audio.addEventListener("play", () => {
-  if (!scrolling) {
-    scrolling = true;
-    requestAnimationFrame(autoScroll);
-  }
-});
-
-// Pause scrolling on touch
-scrollBox.addEventListener("touchstart", () => userTouching = true);
-scrollBox.addEventListener("touchend", () => { userTouching = false; requestAnimationFrame(autoScroll); });
-scrollBox.addEventListener("mouseenter", () => userTouching = true);
-scrollBox.addEventListener("mouseleave", () => { userTouching = false; requestAnimationFrame(autoScroll); });
+  // Also allow click for desktop
+  document.body.addEventListener('click', function(){
+    if(music.paused){
+      music.play();
+      startScroll();
+    } else {
+      toggleScroll();
+    }
+  });
 </script>
+
 </body>
 </html>
