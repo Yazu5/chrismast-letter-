@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Merry Christmas</title>
+
+<!-- Handwritten but readable font -->
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Patrick Hand', cursive;
+    background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364);
+    overflow-x: hidden;
+    color: #3b2f2f;
+  }
+
+  /* Rain overlay */
+  .rain {
+    pointer-events: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: repeating-linear-gradient(
+      120deg,
+      rgba(255,255,255,0.15) 0,
+      rgba(255,255,255,0.15) 1px,
+      transparent 1px,
+      transparent 20px
+    );
+    animation: rain 0.4s linear infinite;
+    opacity: 0.35;
+    z-index: 1;
+  }
+
+  @keyframes rain {
+    from { background-position: 0 0; }
+    to { background-position: 0 100%; }
+  }
+
+  /* Falling leaves */
+  .leaf {
+    position: fixed;
+    top: -50px;
+    width: 30px;
+    height: 30px;
+    background: radial-gradient(circle, #c97b3a 30%, #8b4513 70%);
+    border-radius: 50% 50% 50% 0;
+    opacity: 0.7;
+    animation: fall linear infinite;
+    z-index: 2;
+  }
+
+  @keyframes fall {
+    0% { transform: translateY(-50px) rotate(0deg); }
+    100% { transform: translateY(110vh) rotate(360deg); }
+  }
+
+  /* Scroll (letter) */
+  .scroll-container {
+    position: relative;
+    max-width: 850px;
+    margin: 40px auto;
+    z-index: 5;
+    padding: 10px;
+    overflow: hidden;
+  }
+
+  .scroll {
+    background: #f7e7c3;
+    padding: 40px 30px;
+    border-radius: 20px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+    font-size: 20px;
+    line-height: 1.7;
+    white-space: pre-wrap; /* preserves line breaks and spaces */
+    max-height: 0;
+    opacity: 0;
+    transform: scaleY(0);
+    transform-origin: top;
+    animation: scrollOpen 2s ease forwards;
+    position: relative;
+    overflow: hidden;
+    background-image: url('https://i.imgur.com/8KpE1Wy.png'); /* subtle parchment texture */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  @keyframes scrollOpen {
+    0% { max-height: 0; opacity: 0; transform: scaleY(0); }
+    100% { max-height: 1000px; opacity: 1; transform: scaleY(1); }
+  }
+
+  /* Animated parchment edges */
+  .scroll::before,
+  .scroll::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: #e0c9a6;
+    border-radius: 20px;
+    animation: wave 2s ease-in-out infinite alternate;
+  }
+
+  .scroll::before { top: -10px; }
+  .scroll::after { bottom: -10px; }
+
+  @keyframes wave {
+    0% { transform: scaleX(1) translateY(0); }
+    100% { transform: scaleX(1.02) translateY(3px); }
+  }
+
+  /* Music hint */
+  .hint {
+    text-align: center;
+    font-size: 14px;
+    opacity: 0.6;
+    margin-bottom: 10px;
+    color: #fff;
+  }
+
+  audio {
+    display: none;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="rain"></div>
+
+<!-- Leaves -->
+<script>
+  for (let i = 0; i < 15; i++) {
+    const leaf = document.createElement('div');
+    leaf.className = 'leaf';
+    leaf.style.left = Math.random() * 100 + 'vw';
+    leaf.style.animationDuration = (5 + Math.random() * 5) + 's';
+    leaf.style.animationDelay = Math.random() * 5 + 's';
+    document.body.appendChild(leaf);
+  }
+</script>
+
+<div class="scroll-container">
+  <div class="hint">🎧 Music plays automatically (tap if muted)</div>
+
+  <div class="scroll" id="scroll">
+    Loading letter...
+  </div>
+</div>
+
+<!-- Load letter from separate file -->
+<script>
+  fetch('letter.txt')
+    .then(response => response.text())
+    .then(data => {
+      document.getElementById('scroll').textContent = data;
+    })
+    .catch(err => {
+      document.getElementById('scroll').textContent = "Failed to load the letter.";
+      console.error(err);
+    });
+</script>
+
+<!-- Background music -->
+<audio autoplay loop>
+  <source src="song.mp3" type="audio/mpeg">
+</audio>
+
+</body>
+</html>
